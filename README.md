@@ -331,6 +331,64 @@ QuanLyPhongTro/
 └── docs/
     └── report.docx
 ```
+### Ý nghĩa các file và thư mục
+
+#### `create_collections.js`
+
+Chứa các câu lệnh dùng để tạo các collection cần thiết cho database.
+
+#### `indexes.js`
+
+Chứa các câu lệnh tạo index nhằm hỗ trợ tìm kiếm và truy vấn dữ liệu hiệu quả hơn.
+
+#### `sample_data.js`
+
+Chứa dữ liệu mẫu dùng để kiểm thử database.
+
+#### `member1/`
+
+Chứa các thao tác CRUD và truy vấn liên quan đến:
+
+```text
+rooms
+services
+```
+
+#### `member2/`
+
+Chứa các thao tác CRUD và truy vấn liên quan đến:
+
+```text
+tenants
+contracts
+```
+
+#### `member3/`
+
+Chứa các thao tác CRUD và truy vấn liên quan đến:
+
+```text
+meter_readings
+invoices
+payments
+```
+
+#### `queries/basic_queries.js`
+
+Chứa các câu truy vấn cơ bản dùng để:
+
+- Tìm kiếm dữ liệu
+- Lọc dữ liệu
+- Tra cứu dữ liệu
+- Kiểm tra dữ liệu theo điều kiện
+
+#### `queries/aggregation.js`
+
+Chứa các truy vấn sử dụng MongoDB Aggregation Pipeline để thực hiện các thống kê.
+
+#### `docs/`
+
+Chứa báo cáo và các tài liệu liên quan đến đồ án.
 ---
 
 ## 🧪 Dữ liệu mẫu
