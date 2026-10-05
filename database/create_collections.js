@@ -1,4 +1,6 @@
+use("QuanLyPhongTro_Test");
 // Create MongoDB collections for the boarding house management database
+
 
 // Member 1: select the intended database in mongosh or Compass before running.
 // Existing rooms/services collections receive the same validation rules.
