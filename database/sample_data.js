@@ -50,7 +50,58 @@ if (!room203) {
     room203 = db.rooms.findOne({ roomNumber: "P203" });
 }
 
+// ========================================================
+// Member 2 - Sample Data (tenants)
+// ========================================================
+const member2Tenants = [
+    {
+        _id: ObjectId("651c00000000000000000001"),
+        fullName: "Nguyen Van A",
+        phone: "0901234567",
+        email: "nguyenvana@email.com",
+        identityCard: "001234567890",
+        dateOfBirth: new Date("1995-05-15T00:00:00Z")
+    },
+    {
+        _id: ObjectId("651c00000000000000000002"),
+        fullName: "Tran Thi B",
+        phone: "0912345678",
+        email: "tranthib@email.com",
+        identityCard: "002345678901",
+        dateOfBirth: new Date("1998-08-20T00:00:00Z")
+    },
+    {
+        _id: ObjectId("651c00000000000000000003"),
+        fullName: "Le Van C",
+        phone: "0923456789",
+        email: "levanc@email.com",
+        identityCard: "003456789012",
+        dateOfBirth: new Date("1990-12-10T00:00:00Z")
+    },
+    {
+        _id: ObjectId("651c00000000000000000004"),
+        fullName: "Pham Thi D",
+        phone: "0934567890",
+        email: "phamthid@email.com",
+        identityCard: "004567890123",
+        dateOfBirth: new Date("1993-03-25T00:00:00Z")
+    }
+];
+
+for (const tenant of member2Tenants) {
+    db.tenants.updateOne(
+        { _id: tenant._id },
+        { $setOnInsert: tenant },
+        { upsert: true }
+    );
+}
+
+// ========================================================
+// ========================================================
+// Member 2 - Contracts
+// ========================================================
 // 2. Chuẩn bị / tra cứu Hợp đồng mẫu
+// ========================================================
 let contract101 = db.contracts.findOne({ roomId: room101._id });
 if (!contract101) {
     const contractId = ObjectId("651b00000000000000000101");

@@ -24,7 +24,22 @@ db.invoices.createIndex({ status: 1, dueDate: 1 });
 db.invoices.createIndex({ year: 1, month: 1 });
 
 // 3. payments indexes
-// Hỗ trợ xem lịch sử và tính tổng các khoản thanh toán cho một hóa đơn
+// Ho tro xem lich su va tinh tong cac khoan thanh toan cho mot hoa don
 db.payments.createIndex({ invoiceId: 1 });
-// Hỗ trợ thống kê doanh thu thực thu theo ngày và trạng thái giao dịch
+// Ho tro thong ke doanh thu thuc thu theo ngay va trang thai giao dich
 db.payments.createIndex({ paymentDate: -1, status: 1 });
+
+// ========================================================
+// Member 2 - Indexes (tenants, contracts)
+// ========================================================
+// 1. tenants indexes
+// Ho tro tim kiem nhanh nguoi thue theo so dien thoai
+db.tenants.createIndex({ phone: 1 });
+// Dam bao moi CCCD/CMND chi xuat hien mot lan
+db.tenants.createIndex({ identityCard: 1 }, { unique: true });
+
+// 2. contracts indexes
+// Ho tro tra xuat hop dong theo phong va trang thai
+db.contracts.createIndex({ roomId: 1, status: 1 });
+// Ho tro tim kiem hop dong sap het han
+db.contracts.createIndex({ endDate: 1, status: 1 });

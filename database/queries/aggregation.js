@@ -373,3 +373,52 @@ db.contracts.aggregate([
         $sort: { startDate: -1 }
     }
 ]);
+
+// ========================================================
+// Member 2 - Aggregation (tenants, contracts)
+// ========================================================
+
+// 10. Thong ke so luong hop dong theo trang thai
+db.contracts.aggregate([
+    {
+        $group: {
+            _id: "$status",
+            count: { $sum: 1 }
+        }
+    },
+    {
+        $project: {
+            _id: 0,
+            status: "$_id",
+            contractCount: 1
+        }
+    },
+    {
+        $sort: { status: 1 }
+    }
+]);
+
+// 11. Thong ke tong tien thue va tien cac theo phong
+db.contracts.aggregate([
+    {
+        $lookup: {
+            from: "rooms",
+            localField: "roomId",
+            foreignField: "_id",
+            as: "room"
+        }
+    },
+    { $unwind: "$room" },
+    {
+        $project: {
+            roomNumber: "$room.roomNumber",
+            monthlyRent: 1,
+            deposit: 1,
+            status: 1,
+            tenantCount: { $size: "$tenantIds" }
+        }
+    },
+    {
+        $sort: { roomNumber: 1 }
+    }
+]);

@@ -36,3 +36,30 @@ db.payments.find({
     paymentMethod: "BANK_TRANSFER",
     status: "SUCCESS"
 });
+
+// ========================================================
+// Member 2 - Basic Queries (tenants, contracts)
+// ========================================================
+
+// 1. Tim nguoi thue theo so dien thoai
+db.tenants.find({ phone: "0901234567" });
+
+// 2. Tim nguoi thue theo CCCD/CMND
+db.tenants.find({ identityCard: "001234567890" });
+
+// 3. Xem tat ca hop dong
+db.contracts.find();
+
+// 4. Xem hop dong theo phong
+db.contracts.find({ roomId: ObjectId("651a00000000000000000101") });
+
+// 5. Xem hop dong theo nguoi thue
+db.contracts.find({ tenantIds: ObjectId("651c00000000000000000001") });
+
+// 6. Tim hop dong sap het han (trong 30 ngay toi)
+const now = new Date();
+const next30Days = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+db.contracts.find({
+    status: "ACTIVE",
+    endDate: { $gte: now, $lte: next30Days }
+});
