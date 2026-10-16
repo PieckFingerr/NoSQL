@@ -1,0 +1,27 @@
+{
+  "name": "quanlyphongtro-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Boarding house management API using the official MongoDB driver",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "db:setup": "node src/scripts/setup.js",
+    "db:seed": "node src/scripts/seed.js",
+    "user:create-admin": "node src/scripts/createAdmin.js",
+    "test": "node --test test/*.test.js",
+    "test:integration": "node --test test/integration/*.test.js",
+    "check": "node src/scripts/check.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.20.0",
+    "multer": "^2.0.2"
+  }
+}

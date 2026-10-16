@@ -1,0 +1,8 @@
+backend/.env
+backend/.env.*
+!backend/.env.example
+backend/backups/*.json
+backend/node_modules/
+coverage/
+*.log
+backend/.test-results/

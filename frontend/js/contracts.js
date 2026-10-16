@@ -1,0 +1,7 @@
+startPage(()=>crudPage({title:'Contracts',endpoint:'/contracts',
+  description:'Select one room and one or more tenants. A room can have only one ACTIVE contract.',
+  fields:[relation('roomId','Room','rooms'),relation('tenantIds','Tenants (Ctrl/Cmd to select multiple)','tenants',true),field('startDate','Start date','date'),field('endDate','End date','date'),field('monthlyRent','Monthly rent (VND)','number'),field('deposit','Deposit (VND)','number'),field('status','Status','select',{options:statuses(['ACTIVE','EXPIRED','TERMINATED']),default:'ACTIVE'})],
+  filters:[field('search','Room / tenant name'),relation('roomId','Room','rooms'),field('status','Status','select',{options:statuses(['ACTIVE','EXPIRED','TERMINATED'])})],
+  columns:[{key:'room.roomNumber',label:'Room'},{key:'tenants',label:'Tenants',value:row=>row.tenants.map(t=>t.fullName).join(', ')},{key:'startDate',label:'Starts'},{key:'endDate',label:'Ends'},{key:'monthlyRent',label:'Monthly rent'},{key:'status',label:'Status'}],
+  actions:[{key:'extend',label:'Extend',run:async row=>{const endDate=prompt('New end date (YYYY-MM-DD):',String(row.endDate).slice(0,10));if(endDate){await apiPatch(`/contracts/${row._id}/extend`,{endDate});message('Contract extended.');}}},{key:'terminate',label:'Terminate',run:async row=>{if(confirm('Terminate this contract and release the room?')){await apiPatch(`/contracts/${row._id}/terminate`,{});message('Contract terminated.');}}}]
+}));
