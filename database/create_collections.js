@@ -216,9 +216,55 @@ const member3Validators = {
     }
 };
 
-for (const collectionName of Object.keys(member3Validators)) {
+// ========================================================
+// Member 2 - Tenants, Contracts
+// ========================================================
+const member2Validators = {
+    tenants: {
+        $jsonSchema: {
+            bsonType: "object",
+            required: ["fullName", "phone", "email", "identityCard", "dateOfBirth"],
+            properties: {
+                _id: { bsonType: "objectId" },
+                fullName: { bsonType: "string", description: "Ho va ten nguoi thue" },
+                phone: { bsonType: "string", description: "So dien thoai" },
+                email: { bsonType: "string", description: "Email" },
+                identityCard: { bsonType: "string", description: "CCCD/CMND" },
+                dateOfBirth: { bsonType: "date", description: "Ngay sinh" }
+            }
+        }
+    },
+    contracts: {
+        $jsonSchema: {
+            bsonType: "object",
+            required: ["roomId", "tenantIds", "startDate", "endDate", "monthlyRent", "deposit", "status"],
+            properties: {
+                _id: { bsonType: "objectId" },
+                roomId: { bsonType: "objectId", description: "Reference to rooms collection" },
+                tenantIds: {
+                    bsonType: "array",
+                    items: { bsonType: "objectId" },
+                    description: "Danh sach nguoi thue tham chieu den tenants"
+                },
+                startDate: { bsonType: "date", description: "Ngay bat dau hop dong" },
+                endDate: { bsonType: "date", description: "Ngay ket thuc hop dong" },
+                monthlyRent: { bsonType: "double", minimum: 0, description: "Tien thue hang thang" },
+                deposit: { bsonType: "double", minimum: 0, description: "Tien coc" },
+                status: {
+                    bsonType: "string",
+                    enum: ["ACTIVE", "EXPIRED", "TERMINATED"],
+                    description: "Trang thai hop dong"
+                }
+            }
+        }
+    }
+};
+
+const allValidators = { ...member2Validators, ...member3Validators };
+
+for (const collectionName of Object.keys(allValidators)) {
     const options = {
-        validator: member3Validators[collectionName],
+        validator: allValidators[collectionName],
         validationLevel: "strict",
         validationAction: "error"
     };
