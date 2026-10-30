@@ -4,7 +4,7 @@
 // Prices are in VND; room prices are monthly and areas are in square metres.
 // $setOnInsert makes reruns safe and preserves edits to existing records.
 const member1Rooms = [
-    { roomNumber: "P101", floor: Int32(1), price: Double(2500000), area: Double(18), status: "AVAILABLE" },
+    { roomNumber: "P101", floor: Int32(1), price: Double(2500000), area: Double(18), status: "OCCUPIED" },
     { roomNumber: "P102", floor: Int32(1), price: Double(2800000), area: Double(20), status: "OCCUPIED" },
     { roomNumber: "P103", floor: Int32(1), price: Double(3000000), area: Double(22), status: "MAINTENANCE" },
     { roomNumber: "P201", floor: Int32(2), price: Double(3000000), area: Double(22), status: "OCCUPIED" },
@@ -219,6 +219,17 @@ if (!contract203) {
         { upsert: true }
     );
     contract203 = db.contracts.findOne({ _id: contractId });
+}
+
+// Phong co hop dong ACTIVE phai o trang thai OCCUPIED (giu nguyen MAINTENANCE).
+// Sua ca database da nap ban cu, khi P101 con AVAILABLE du da co hop dong.
+for (const contract of [contract101, contract102, contract201, contract203]) {
+    if (contract && contract.status === "ACTIVE") {
+        db.rooms.updateOne(
+            { _id: contract.roomId, status: "AVAILABLE" },
+            { $set: { status: "OCCUPIED" } }
+        );
+    }
 }
 
 // ========================================================

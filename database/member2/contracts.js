@@ -172,13 +172,43 @@ function deleteContract(contractId) {
     return result;
 }
 
+// 10. UPDATE: Chuyen cac hop dong ACTIVE da qua endDate sang EXPIRED
+// Phong duoc tra ve AVAILABLE neu khong con hop dong ACTIVE (giu nguyen MAINTENANCE)
+function expireContracts(asOfDate) {
+    const now = asOfDate ? new Date(asOfDate) : new Date();
+    const expired = db.contracts.find({
+        status: "ACTIVE",
+        endDate: { $lt: now }
+    }).toArray();
+
+    for (const contract of expired) {
+        db.contracts.updateOne(
+            { _id: contract._id, status: "ACTIVE" },
+            { $set: { status: "EXPIRED", updatedAt: new Date() } }
+        );
+
+        const otherActive = db.contracts.findOne({
+            roomId: contract.roomId,
+            status: "ACTIVE"
+        });
+        if (!otherActive) {
+            db.rooms.updateOne(
+                { _id: contract.roomId, status: "OCCUPIED" },
+                { $set: { status: "AVAILABLE" } }
+            );
+        }
+    }
+
+    return { expiredCount: expired.length, contractIds: expired.map(c => c._id) };
+}
+
 // ========================================================
 // DEMO CHAY THU CRUD HOP DONG
 // ========================================================
 {
     const tempRoomId = ObjectId();
     const tempTenantId = ObjectId();
-    const tempContractId = ObjectId();
+    let tempContractId = null;
 
     print(">>> 1. TAO PHONG VA NGUOI THUE DEMO:");
     db.rooms.insertOne({
@@ -209,6 +239,7 @@ function deleteContract(contractId) {
             2000000
         );
         printjson(contractResult);
+        tempContractId = contractResult.insertedId;
 
         // Kiem tra trang thai phong
         const roomAfter = db.rooms.findOne({ _id: tempRoomId });
@@ -252,7 +283,8 @@ function deleteContract(contractId) {
         print("Trang thai phong sau khi ket thuc hop dong: " + roomAfterTerm.status);
     } finally {
         print(">>> 8. CLEANUP DEMO DATA:");
-        db.contracts.deleteMany({ _id: { $in: [tempContractId] } });
+        // Xoa theo roomId de don ca hop dong tao ra truoc khi buoc nao do loi
+        db.contracts.deleteMany({ roomId: tempRoomId });
         db.tenants.deleteOne({ _id: tempTenantId });
         db.rooms.deleteOne({ _id: tempRoomId });
         print("Cleanup demo contract completed.");

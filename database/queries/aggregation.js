@@ -334,8 +334,13 @@ db.meter_readings.aggregate([
 // 9. Lịch sử thuê của một người thuê
 // Mục đích: Tra cứu toàn bộ các hợp đồng và phòng mà một khách thuê đã từng/đang thuê
 // --------------------------------------------------------
+const targetTenant = db.tenants.findOne({ identityCard: "001234567890" });
+const targetTenantId = targetTenant ? targetTenant._id : ObjectId("651c00000000000000000001");
+
 db.contracts.aggregate([
+    { $match: { tenantIds: targetTenantId } },
     { $unwind: "$tenantIds" },
+    { $match: { tenantIds: targetTenantId } },
     {
         $lookup: {
             from: "tenants",
@@ -358,7 +363,7 @@ db.contracts.aggregate([
         $project: {
             tenantId: "$tenant._id",
             tenantName: "$tenant.fullName",
-            idCard: "$tenant.idCard",
+            identityCard: "$tenant.identityCard",
             phone: "$tenant.phone",
             roomNumber: "$room.roomNumber",
             floor: "$room.floor",
@@ -390,7 +395,7 @@ db.contracts.aggregate([
         $project: {
             _id: 0,
             status: "$_id",
-            contractCount: 1
+            contractCount: "$count"
         }
     },
     {
@@ -410,12 +415,24 @@ db.contracts.aggregate([
     },
     { $unwind: "$room" },
     {
+        $group: {
+            _id: "$room.roomNumber",
+            contractCount: { $sum: 1 },
+            activeContracts: { $sum: { $cond: [{ $eq: ["$status", "ACTIVE"] }, 1, 0] } },
+            totalMonthlyRent: { $sum: "$monthlyRent" },
+            totalDeposit: { $sum: "$deposit" },
+            totalTenants: { $sum: { $size: "$tenantIds" } }
+        }
+    },
+    {
         $project: {
-            roomNumber: "$room.roomNumber",
-            monthlyRent: 1,
-            deposit: 1,
-            status: 1,
-            tenantCount: { $size: "$tenantIds" }
+            _id: 0,
+            roomNumber: "$_id",
+            contractCount: 1,
+            activeContracts: 1,
+            totalMonthlyRent: 1,
+            totalDeposit: 1,
+            totalTenants: 1
         }
     },
     {
