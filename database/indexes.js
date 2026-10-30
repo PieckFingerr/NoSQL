@@ -45,5 +45,10 @@ db.tenants.createIndex({ identityCard: 1 }, { unique: true });
 // 2. contracts indexes
 // Ho tro tra xuat hop dong theo phong va trang thai
 db.contracts.createIndex({ roomId: 1, status: 1 });
+// Dam bao moi phong chi co toi da 1 hop dong ACTIVE (vi pham -> loi 11000)
+db.contracts.createIndex(
+    { roomId: 1 },
+    { unique: true, partialFilterExpression: { status: "ACTIVE" } }
+);
 // Ho tro tim kiem hop dong sap het han
 db.contracts.createIndex({ endDate: 1, status: 1 });

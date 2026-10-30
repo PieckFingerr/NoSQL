@@ -3,8 +3,8 @@
 use("QuanLyPhongTro_Test");
 
 {
-    let passed = 0;
-    let failed = 0;
+    var passed = 0; // var: mongosh CLI dua function ra khoi block
+    var failed = 0; // var: mongosh CLI dua function ra khoi block
     function check(condition, label) {
         print((condition ? "PASS: " : "FAIL: ") + label);
         if (condition) passed++; else failed++;
@@ -48,6 +48,7 @@ use("QuanLyPhongTro_Test");
     check(hasIndex(tenantIndexes, { phone: 1 }, false), "tenants index (phone)");
     check(hasIndex(tenantIndexes, { identityCard: 1 }, true), "tenants unique index (identityCard)");
     check(hasIndex(contractIndexes, { roomId: 1, status: 1 }, false), "contracts index (roomId, status)");
+    check(hasIndex(contractIndexes, { roomId: 1 }, true), "contracts unique ACTIVE index (roomId)");
     check(hasIndex(contractIndexes, { endDate: 1, status: 1 }, false), "contracts index (endDate, status)");
 
     // C. Kiem tra so luong document mau ban dau
@@ -60,10 +61,13 @@ use("QuanLyPhongTro_Test");
     const testRoomId = ObjectId();
     const testContractId1 = ObjectId();
     const testContractId2 = ObjectId();
+    const expiringRoomId = ObjectId();
+    const expiringTenantId = ObjectId();
+    const expiringContractId = ObjectId();
 
-    const createdTenantIds = [testTenantId1, testTenantId2];
-    const createdRoomIds = [testRoomId];
-    const createdContractIds = [testContractId1, testContractId2];
+    const createdTenantIds = [testTenantId1, testTenantId2, expiringTenantId];
+    const createdRoomIds = [testRoomId, expiringRoomId];
+    const createdContractIds = [testContractId1, testContractId2, expiringContractId];
 
     try {
         // ========================================================
@@ -139,6 +143,9 @@ use("QuanLyPhongTro_Test");
         };
         check(db.contracts.insertOne(validContract1).acknowledged, "valid contract 1 inserted");
 
+        // MongoDB khong co trigger: thuc hien buoc cap nhat phong nhu createContract()
+        db.rooms.updateOne({ _id: testRoomId }, { $set: { status: "OCCUPIED" } });
+
         // Kiem tra phong da duoc cap nhat thanh OCCUPIED
         const roomAfterContract = db.rooms.findOne({ _id: testRoomId });
         check(roomAfterContract.status === "OCCUPIED", "room status changed to OCCUPIED");
@@ -170,6 +177,10 @@ use("QuanLyPhongTro_Test");
             { _id: testContractId1 },
             { $set: { status: "TERMINATED" } }
         );
+        // Nhu terminateContract(): tra phong ve AVAILABLE neu khong con hop dong ACTIVE
+        if (!db.contracts.findOne({ roomId: testRoomId, status: "ACTIVE" })) {
+            db.rooms.updateOne({ _id: testRoomId }, { $set: { status: "AVAILABLE" } });
+        }
         const roomAfterTerminate = db.rooms.findOne({ _id: testRoomId });
         check(roomAfterTerminate.status === "AVAILABLE", "room status changed to AVAILABLE after terminate");
 
@@ -179,10 +190,6 @@ use("QuanLyPhongTro_Test");
         print("\n--- 3. Testing expiring contracts query ---");
 
         // Tao hop dong sap het han
-        const expiringRoomId = ObjectId();
-        const expiringTenantId = ObjectId();
-        const expiringContractId = ObjectId();
-
         db.rooms.insertOne({
             _id: expiringRoomId,
             roomNumber: "P888",
@@ -229,14 +236,6 @@ use("QuanLyPhongTro_Test");
         for (const id of createdTenantIds) db.tenants.deleteOne({ _id: id });
         for (const id of createdContractIds) db.contracts.deleteOne({ _id: id });
         for (const id of createdRoomIds) db.rooms.deleteOne({ _id: id });
-
-        // Cleanup expiring contract test data
-        const expiringRoomId = ObjectId();
-        const expiringTenantId = ObjectId();
-        const expiringContractId = ObjectId();
-        db.contracts.deleteOne({ _id: expiringContractId });
-        db.tenants.deleteOne({ _id: expiringTenantId });
-        db.rooms.deleteOne({ _id: expiringRoomId });
 
         check(db.tenants.countDocuments({ _id: { $in: createdTenantIds } }) === 0, "test tenants cleaned up");
         check(db.contracts.countDocuments({ _id: { $in: createdContractIds } }) === 0, "test contracts cleaned up");

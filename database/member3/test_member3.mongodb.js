@@ -3,8 +3,8 @@
 use("QuanLyPhongTro_Test");
 
 {
-    let passed = 0;
-    let failed = 0;
+    var passed = 0; // var: mongosh CLI dua function ra khoi block
+    var failed = 0; // var: mongosh CLI dua function ra khoi block
     function check(condition, label) {
         print((condition ? "PASS: " : "FAIL: ") + label);
         if (condition) passed++; else failed++;
